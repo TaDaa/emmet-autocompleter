@@ -65,17 +65,24 @@ def factory():
                 if sortlist.keys[index] == target:
                     return sortlist.values[index]
             return None
-        def findCompletions(self,sortlist,target,menu=None):
-            result = []
+        def findCompletions(self,sortlist,target,menu=None,results={}):
             range_value = sortlist.findRange(target)
             keys  = sortlist.keys
+            result = []
             if len(keys):
                 if menu != None:
                     for i in range_value:
-                        result.append({"abbr":keys[i],"icase":1,"dup":1,"word":keys[i],"menu":menu})
+                        key = keys[i]
+                        if not key in results:
+                            results[key] = {"abbr":keys[i],"icase":1,"dup":1,"word":keys[i],"menu":menu}
+                            result.append(results[key])
+                        else:
+                            results[key]["menu"] += '|'+menu
                 else:
                     for i in range_value:
-                        result.append({"abbr":keys[i],"icase":1,"dup":1,"word":keys[i]})
+                        if not key in results:
+                            results[key] = {"abbr":keys[i],"icase":1,"dup":1,"word":keys[i]}
+                            result.append(results[key])
             return result
         def on(self,name,fn):
             if name in self.events:
@@ -112,6 +119,7 @@ def factory():
                 state = self.emmet_parser.parse(active_line,column)
                 symbols = self.symbols
                 result = []
+                result_map = {}
                 target = ''
                 type = state[0]
                 tag = state[1]
@@ -120,7 +128,7 @@ def factory():
                     tag = ''
                 if type == emmetparser.NAME or type == emmetparser.MULTIPLIER:
                     target = tag
-                    self.filter(filter,lambda key,value: result.extend(self.findCompletions(sortlist=value,target=target,menu=key)))
+                    self.filter(filter,lambda key,value: result.extend(self.findCompletions(sortlist=value,target=target,menu=key,results=result_map)))
                 else:
                     matches = []
                     self.filter(filter,lambda key,value:matches.append((key,self.findExact(value,tag))))
@@ -128,7 +136,7 @@ def factory():
                         target = state[2]
                         for match in matches:
                             if match[1] != None:
-                                result.extend(self.findCompletions(sortlist=match[1]['attributes'],target=target,menu=match[0]))
+                                result.extend(self.findCompletions(sortlist=match[1]['attributes'],target=target,menu=match[0],results=result_map))
                 return {'words' : result, 'column_start':column-len(target)}
 
 
