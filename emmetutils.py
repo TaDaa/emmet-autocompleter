@@ -1,5 +1,9 @@
-from os import walk,path
+import sys
 import bisect
+from os import walk,path
+is_v3 = False
+if (sys.version_info > (3, 0)):
+    is_v3 = True
 
 folder = {}
 
@@ -26,10 +30,15 @@ class File():
 
 def byteify(input):
     if isinstance(input, dict):
-        return {byteify(key):byteify(value) for key,value in input.iteritems()}
+        if is_v3:
+            return {byteify(key):byteify(value) for key,value in input.items()}
+        else:
+            return {byteify(key):byteify(value) for key,value in input.iteritems()}
     elif isinstance(input, list):
         return [byteify(element) for element in input]
-    elif isinstance(input, unicode):
+    elif is_v3 == True and isinstance(input, str):
+        return str(input)
+    elif is_v3 == False and isinstance(input, unicode):
         return input.encode('utf-8')
     else:
         return input
@@ -39,7 +48,7 @@ def getModifiedFiles(project,extensions,excluded_names):
     if not project in folder:
         folder[project] = {}
     active_folder = folder[project]
-    active_keys = active_folder.keys()
+    active_keys = list(active_folder.keys())
     files = getProjectFiles(project,excluded_names)
     for f in files:
         path = f.path

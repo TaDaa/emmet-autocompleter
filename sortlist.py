@@ -50,7 +50,7 @@ class SortList():
         del self.keys[0:ln]
         del self.values[0:ln]
     def search(self,value):
-        i = bisect.bisect_right(self.keys,value)
+        i = bisect.bisect_right(self.keys, value)
         if i:
             return i-1
         return -1

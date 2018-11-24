@@ -3,7 +3,6 @@ import emmetparser as parser
 import emmetcompleter as completer
 import imp
 
-
 addSymbolsFromFile = completer.addSymbolsFromFile
 handleType = completer.handleType
 getCompletions = completer.getCompletions
